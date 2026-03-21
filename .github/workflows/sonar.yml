@@ -11,6 +11,7 @@ jobs:
   build:
     name: Build and analyze
     runs-on: windows-latest
+    
     steps:
     # ── Java (required by SonarCloud scanner) ────────────────────────────────
       - name: Set up JDK 17
@@ -20,7 +21,8 @@ jobs:
           distribution: 'zulu' # Alternative distribution options are available.
 
     # ── Checkout — full history for better blame analysis ─────────────────────
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -68,13 +70,17 @@ jobs:
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin `
             /k:"RedeArmy_Product-Catalog-Platform" `
             /o:"redearmy" `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.token="$env:SONAR_TOKEN" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.exclusions="**/bin/**,**/obj/**,**/Migrations/**,**/*.Designer.cs,**/node_modules/**,**/dist/**"
+            /d:sonar.projectName="Product Catalog Platform" `
+            /d:sonar.projectVersion="1.0" `
+            /d:sonar.exclusions="**/bin/**,**/obj/**,**/Migrations/**,**/*.Designer.cs,**/node_modules/**,**/dist/**,**/wwwroot/**" `
+            /d:sonar.coverage.exclusions="**/Program.cs,**/Migrations/**,**/*Dto.cs,**/*Configuration.cs" `
+            /d:sonar.scanner.skipJreProvisioning="true"
 
           dotnet build backend/src/Core.Commerce/Core.Commerce.sln `
             --no-restore `
             --configuration Release
 
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+            /d:sonar.token="$env:SONAR_TOKEN"
