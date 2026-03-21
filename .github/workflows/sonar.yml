@@ -68,7 +68,7 @@ jobs:
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin `
             /k:"RedeArmy_Product-Catalog-Platform" `
             /o:"redearmy" `
-            /d:sonar.token="$env:SONAR_TOKEN" `
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/Migrations/**,**/*.Designer.cs,**/node_modules/**,**/dist/**"
 
@@ -77,4 +77,4 @@ jobs:
             --configuration Release
 
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end `
-            /d:sonar.token="$env:SONAR_TOKEN"
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
