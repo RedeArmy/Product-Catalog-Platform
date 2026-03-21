@@ -70,10 +70,10 @@ jobs:
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin `
             /k:"RedeArmy_Product-Catalog-Platform" `
             /o:"redearmy" `
+            /n:"Product Catalog Platform" `
+            /v:"1.0" `
             /d:sonar.token="$env:SONAR_TOKEN" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.projectName="Product Catalog Platform" `
-            /d:sonar.projectVersion="1.0" `
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/Migrations/**,**/*.Designer.cs,**/node_modules/**,**/dist/**,**/wwwroot/**" `
             /d:sonar.coverage.exclusions="**/Program.cs,**/Migrations/**,**/*Dto.cs,**/*Configuration.cs" `
             /d:sonar.scanner.skipJreProvisioning="true"
