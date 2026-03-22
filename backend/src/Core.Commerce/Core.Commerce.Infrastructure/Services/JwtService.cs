@@ -3,19 +3,17 @@ using System.Security.Claims;
 using System.Text;
 using Core.Commerce.Application.Interfaces;
 using Core.Commerce.Domain.Entities;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Core.Commerce.Infrastructure.Services;
 
-public class JwtService(IOptions<JwtOptions> options) : IJwtService
+public class JwtService(IConfiguration config) : IJwtService
 {
-    private readonly JwtOptions _options = options.Value;
-    
     public string GenerateToken(AppUser user)
     {
-        var key         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SigningKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var key     = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+        var credentials   = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
@@ -26,8 +24,8 @@ public class JwtService(IOptions<JwtOptions> options) : IJwtService
         };
 
         var token = new JwtSecurityToken(
-            issuer:             _options.Issuer,
-            audience:           _options.Audience,
+            issuer:             config["Jwt:Issuer"],
+            audience:           config["Jwt:Audience"],
             claims:             claims,
             expires:            GetExpiration(),
             signingCredentials: credentials
@@ -37,5 +35,6 @@ public class JwtService(IOptions<JwtOptions> options) : IJwtService
     }
 
     public DateTime GetExpiration()
-        => DateTime.UtcNow.AddMinutes(_options.ExpiresInMinutes);
+        => DateTime.UtcNow.AddMinutes(
+            double.Parse(config["Jwt:ExpiresInMinutes"] ?? "60"));
 }

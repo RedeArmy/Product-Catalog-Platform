@@ -60,9 +60,7 @@ public static class ServiceExtensions
         this IServiceCollection services,
         IConfiguration config)
     {
-        services.Configure<JwtOptions>(config.GetSection("Jwt"));
-        
-        var key = Encoding.UTF8.GetBytes(config["Jwt:SigningKey"]!);
+        var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]!);
 
         services
             .AddAuthentication(options =>
