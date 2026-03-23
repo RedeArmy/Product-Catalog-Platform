@@ -40,12 +40,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Default: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
-      Jwt__Key:              ${JWT_KEY}
-      Jwt__Issuer:           ${JWT_ISSUER}
-      Jwt__Audience:         ${JWT_AUDIENCE}
-      Jwt__ExpiresInMinutes: ${JWT_EXPIRES_MINUTES}
-      Uploads__Path:         /app/uploads
-      Uploads__BaseUrl:      ${UPLOADS_BASE_URL}
+      Jwt__SigningKey:        ${JWT_KEY}
+      Jwt__Issuer:            ${JWT_ISSUER}
+      Jwt__Audience:          ${JWT_AUDIENCE}
+      Jwt__ExpiresInMinutes:  ${JWT_EXPIRES_MINUTES}
+      Uploads__Path:          /app/uploads
+      Uploads__BaseUrl:       ${UPLOADS_BASE_URL}
     volumes:
       - uploads_data:/app/uploads
     ports:
@@ -55,19 +55,19 @@ services:
   # FRONTEND — React + Vite (served via Nginx)
   # This service is only used under the "full" profile.
   # ─────────────────────────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: ecommerce_web
-    restart: unless-stopped
-    profiles: ["full"] # only starts with: docker compose --profile full up
-    depends_on:
-      - backend
-    environment:
-      VITE_API_URL: ${VITE_API_URL}
-    ports:
-      - "3000:80"
+  #frontend:
+  #  build:
+  #    context: ./frontend
+  #    dockerfile: Dockerfile
+  #  container_name: ecommerce_web
+  #  restart: unless-stopped
+  #  profiles: ["full"] # only starts with: docker compose --profile full up
+  #  depends_on:
+  #    - backend
+  #  environment:
+  #    VITE_API_URL: ${VITE_API_URL}
+  #  ports:
+  #    - "3000:80"
 
 # ─────────────────────────────────────────────────────────
 # VOLUMES

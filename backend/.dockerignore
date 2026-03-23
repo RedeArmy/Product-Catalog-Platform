@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.vs/
+**/.idea/
+**/TestResults/
+**/uploads/
+**/*.user
+**/*.suo
+**/appsettings.Development.json
