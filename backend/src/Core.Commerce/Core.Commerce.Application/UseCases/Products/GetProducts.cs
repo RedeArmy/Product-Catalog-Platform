@@ -1,6 +1,7 @@
 using Core.Commerce.Application.Common;
 using Core.Commerce.Application.DTOs;
 using Core.Commerce.Application.Interfaces;
+using Core.Commerce.Domain.Entities;
 using Core.Commerce.Domain.Interfaces;
 
 namespace Core.Commerce.Application.UseCases.Products;
@@ -28,9 +29,17 @@ public class GetProducts(IUnitOfWork uow, IFileStorageService storage)
         return Result<ProductDto>.Ok(Map(product));
     }
 
-    private ProductDto Map(Domain.Entities.Product p) => new(
-        p.Id, p.Name, p.Description, p.Price, p.Sku, p.Inventory,
-        p.ImagePath is not null ? storage.GetPublicUrl(p.ImagePath) : null,
-        p.IsActive, p.CreatedAt, p.UpdatedAt
-    );
+    private ProductDto Map(Product p) => new()
+    {
+        Id          = p.Id,
+        Name        = p.Name,
+        Description = p.Description,
+        Price       = p.Price,
+        Sku         = p.Sku,
+        Inventory   = p.Inventory,
+        ImageUrl    = p.ImagePath is not null ? storage.GetPublicUrl(p.ImagePath) : null,
+        IsActive    = p.IsActive,
+        CreatedAt   = p.CreatedAt,
+        UpdatedAt   = p.UpdatedAt
+    };
 }

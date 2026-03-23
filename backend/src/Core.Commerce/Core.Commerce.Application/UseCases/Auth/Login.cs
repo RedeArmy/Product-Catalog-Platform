@@ -17,11 +17,11 @@ public class Login(UserManager<AppUser> userManager, IJwtService jwt)
 
         var token = jwt.GenerateToken(user);
 
-        return Result<LoginResponseDto>.Ok(new LoginResponseDto(
-            AccessToken: token,
-            Email:       user.Email!,
-            Role:        user.Role.ToString(),
-            ExpiresAt:   jwt.GetExpiration()
-        ));
+        return Result<LoginResponseDto>.Ok(new LoginResponseDto
+        {
+            AccessToken = token,
+            Role        = user.Role.ToString(),
+            ExpiresAt   = jwt.GetExpiration()
+        });
     }
 }
