@@ -34,11 +34,18 @@ public class CreateProduct(IUnitOfWork uow, IFileStorageService storage)
         await uow.Products.AddAsync(product, ct);
         await uow.SaveChangesAsync(ct);
 
-        return Result<ProductDto>.Ok(new ProductDto(
-            product.Id, product.Name, product.Description, product.Price,
-            product.Sku, product.Inventory,
-            imagePath is not null ? storage.GetPublicUrl(imagePath) : null,
-            product.IsActive, product.CreatedAt, product.UpdatedAt
-        ));
+        return Result<ProductDto>.Ok(new ProductDto
+        {
+            Id          = product.Id,
+            Name        = product.Name,
+            Description = product.Description,
+            Price       = product.Price,
+            Sku         = product.Sku,
+            Inventory   = product.Inventory,
+            ImageUrl    = imagePath is not null ? storage.GetPublicUrl(imagePath) : null,
+            IsActive    = product.IsActive,
+            CreatedAt   = product.CreatedAt,
+            UpdatedAt   = product.UpdatedAt
+        });
     }
 }

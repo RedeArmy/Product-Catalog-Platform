@@ -1,30 +1,33 @@
 namespace Core.Commerce.Application.DTOs;
 
-public record ProductDto(
-    Guid     Id,
-    string   Name,
-    string   Description,
-    decimal  Price,
-    string   Sku,
-    int      Inventory,
-    string?  ImageUrl,
-    bool     IsActive,
-    DateTime CreatedAt,
-    DateTime UpdatedAt
-);
+public class ProductDto
+{
+    public Guid     Id          { get; set; }
+    public string   Name        { get; set; } = string.Empty;
+    public string   Description { get; set; } = string.Empty;
+    public decimal  Price       { get; set; }
+    public string   Sku         { get; set; } = string.Empty;
+    public int      Inventory   { get; set; }
+    public string?  ImageUrl    { get; set; }
+    public bool     IsActive    { get; set; }
+    public DateTime CreatedAt   { get; set; }
+    public DateTime UpdatedAt   { get; set; }
+}
 
-public abstract record CreateProductDto(
-    string  Name,
-    string  Description,
-    decimal Price,
-    string  Sku,
-    int     Inventory
-);
+public class CreateProductDto
+{
+    public string  Name        { get; set; } = string.Empty;
+    public string  Description { get; set; } = string.Empty;
+    public decimal Price       { get; set; }
+    public string  Sku         { get; set; } = string.Empty;
+    public int     Inventory   { get; set; }
+}
 
-public abstract record UpdateProductDto(
-    string  Name,
-    string  Description,
-    decimal Price,
-    string  Sku,
-    int     Inventory
-);
+public class UpdateProductDto
+{
+    public string  Name        { get; set; } = string.Empty;
+    public string  Description { get; set; } = string.Empty;
+    public decimal Price       { get; set; }
+    public string  Sku         { get; set; } = string.Empty;
+    public int     Inventory   { get; set; }
+}
