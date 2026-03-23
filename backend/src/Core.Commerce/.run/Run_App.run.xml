@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run_App" type="CompoundRunConfigurationType">
+    <toRun name="Core.Commerce.API: http" type="LaunchSettings" />
+    <toRun name="Start Postgres" type="docker-deploy" />
+    <method v="2" />
+  </configuration>
+</component>

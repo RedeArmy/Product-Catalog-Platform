@@ -1,13 +1,61 @@
+using Core.Commerce.Infrastructure.Extensions;
+using Core.Commerce.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Swagger with JWT support
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title   = "Product Catalog Platform API",
+        Version = "v1"
+    });
+
+    // Adds the Authorize button in Swagger UI
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name         = "Authorization",
+        Type         = SecuritySchemeType.Http,
+        Scheme       = "Bearer",
+        BearerFormat = "JWT",
+        In           = ParameterLocation.Header,
+        Description  = "Enter your JWT token. Example: Bearer eyJhbGci..."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id   = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// Infrastructure layers — registered via extension methods
+builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddIdentityServices();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.AddCorsPolicy(builder.Configuration);
 
 var app = builder.Build();
+
+// Apply pending migrations and seed initial data on every startup
+await InitializeDatabaseAsync(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -16,8 +64,58 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("CorsPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
+return;
+
+// Database initialization 
+static async Task InitializeDatabaseAsync(WebApplication app)
+{
+    using var scope  = app.Services.CreateScope();
+    var services     = scope.ServiceProvider;
+    var logger       = services.GetRequiredService<ILogger<Program>>();
+    const int maxRetries = 10;
+    const int delaySeconds = 3;
+
+    for (var attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            var db      = services.GetRequiredService<AppDbContext>();
+            var pending = await db.Database.GetPendingMigrationsAsync();
+
+            var enumerable = pending as string[] ?? pending.ToArray();
+            
+            if (enumerable.Length != 0)
+            {
+                logger.LogInformation(
+                    "Applying {Count} pending migration(s): {Names}",
+                    enumerable.Length,
+                    string.Join(", ", enumerable));
+
+                await db.Database.MigrateAsync();
+                logger.LogInformation("Migrations applied successfully.");
+            }
+
+            await SeedData.SeedAsync(services);
+            return;
+        }
+        catch (Exception ex) when (attempt < maxRetries)
+        {
+            logger.LogWarning(
+                ex,
+                "Database not ready. Attempt {Attempt}/{Max}. Retrying in {Delay}s...",
+                attempt, maxRetries, delaySeconds);
+
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+        }
+    }
+
+    // If all attempts failed — throw without logging (caller handles it)
+    throw new InvalidOperationException(
+        $"Database initialization failed after {maxRetries} attempts.");
+}
