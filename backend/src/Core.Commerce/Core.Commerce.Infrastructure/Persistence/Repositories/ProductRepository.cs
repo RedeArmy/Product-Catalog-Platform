@@ -23,12 +23,15 @@ public class ProductRepository(AppDbContext context) : IProductRepository
             .FirstOrDefaultAsync(p => p.Id == id && p.IsActive, ct);
 
     public async Task<bool> SkuExistsAsync(
-        string sku,
-        Guid? excludeId = null,
-        CancellationToken ct = default)
-        => await context.Products
-            .AnyAsync(p => p.Sku == sku.ToUpperInvariant()
-                           && (excludeId == null || p.Id != excludeId), ct);
+        string            sku,
+        Guid?             excludeId = null,
+        CancellationToken ct        = default)
+    {
+        var upperSku = sku.ToUpperInvariant();
+
+        return await context.Products
+            .AnyAsync(p => p.Sku == upperSku && (excludeId == null || p.Id != excludeId), ct);
+    }
 
     public async Task AddAsync(Product product, CancellationToken ct = default)
         => await context.Products.AddAsync(product, ct);

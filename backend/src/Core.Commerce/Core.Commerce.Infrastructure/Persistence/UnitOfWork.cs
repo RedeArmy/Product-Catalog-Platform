@@ -7,12 +7,14 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
 {
     private ProductRepository? _products;
 
-    public IProductRepository Products
-        => _products ??= new ProductRepository(context);
+    public IProductRepository Products => _products ??= new ProductRepository(context);
 
     public async Task<int> SaveChangesAsync(CancellationToken ct = default)
         => await context.SaveChangesAsync(ct);
 
     public async ValueTask DisposeAsync()
-        => await context.DisposeAsync();
+    {
+        await context.DisposeAsync();
+        GC.SuppressFinalize(this);
+    }
 }
