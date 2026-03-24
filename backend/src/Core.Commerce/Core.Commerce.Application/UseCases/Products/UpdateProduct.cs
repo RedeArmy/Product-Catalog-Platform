@@ -34,23 +34,26 @@ public class UpdateProduct(IUnitOfWork uow, IFileStorageService storage)
         product.Price       = dto.Price;
         product.Sku         = dto.Sku.Trim().ToUpperInvariant();
         product.Inventory   = dto.Inventory;
+        product.CategoryId  = dto.CategoryId;
+        product.IsActive    = dto.IsActive;
 
         uow.Products.Update(product);
         await uow.SaveChangesAsync(ct);
 
         return Result<ProductDto>.Ok(new ProductDto
         {
-            Id          = product.Id,
-            Name        = product.Name,
-            Description = product.Description,
-            Price       = product.Price,
-            Sku         = product.Sku,
-            Inventory   = product.Inventory,
-            Category    = product.Category,
-            ImageUrl    = product.ImagePath is not null ? storage.GetPublicUrl(product.ImagePath) : null,
-            IsActive    = product.IsActive,
-            CreatedAt   = product.CreatedAt,
-            UpdatedAt   = product.UpdatedAt
+            Id           = product.Id,
+            Name         = product.Name,
+            Description  = product.Description,
+            Price        = product.Price,
+            Sku          = product.Sku,
+            Inventory    = product.Inventory,
+            CategoryId   = product.CategoryId,
+            CategoryName = product.Category?.Name,
+            ImageUrl     = product.ImagePath is not null ? storage.GetPublicUrl(product.ImagePath) : null,
+            IsActive     = product.IsActive,
+            CreatedAt    = product.CreatedAt,
+            UpdatedAt    = product.UpdatedAt
         });
     }
 }

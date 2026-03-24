@@ -8,13 +8,18 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
     public async Task<IEnumerable<Category>> GetAllAsync(CancellationToken ct = default)
         => await context.Categories
+            .OrderBy(c => c.Name)
+            .ToListAsync(ct);
+    
+    public async Task<IEnumerable<Category>> GetPublicAsync(CancellationToken ct = default)
+        => await context.Categories
             .Where(c => c.IsActive)
             .OrderBy(c => c.Name)
             .ToListAsync(ct);
 
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await context.Categories
-            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive, ct);
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public async Task<bool> NameExistsAsync(
         string name,

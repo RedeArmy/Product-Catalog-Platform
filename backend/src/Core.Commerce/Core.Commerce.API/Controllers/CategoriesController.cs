@@ -14,13 +14,22 @@ public class CategoriesController(
     DeleteCategory   deleteCategory) : ControllerBase
 {
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
         var result = await getCategories.ExecuteAllAsync(ct);
         return Ok(result.Data);
     }
+    
+    [HttpGet("public")]
+    public async Task<IActionResult> GetPublic(CancellationToken ct)
+    {
+        var result = await getCategories.ExecutePublicAsync(ct);
+        return Ok(result.Data);
+    }
 
     [HttpGet("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var result = await getCategories.ExecuteByIdAsync(id, ct);

@@ -8,19 +8,21 @@ public class ProductRepository(AppDbContext context) : IProductRepository
 {
     public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken ct = default)
         => await context.Products
-            .Where(p => p.IsActive)
+            .Include(p => p.Category)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(ct);
 
     public async Task<IEnumerable<Product>> GetPublicAsync(CancellationToken ct = default)
         => await context.Products
+            .Include(p => p.Category)
             .Where(p => p.IsActive && p.Inventory > 5)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(ct);
 
     public async Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await context.Products
-            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive, ct);
+            .Include(p => p.Category)
+            .FirstOrDefaultAsync(p => p.Id == id, ct);
 
     public async Task<bool> SkuExistsAsync(
         string            sku,

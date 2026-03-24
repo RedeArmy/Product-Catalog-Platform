@@ -31,16 +31,17 @@ public class GetProducts(IUnitOfWork uow, IFileStorageService storage)
 
     private ProductDto Map(Product product) => new()
     {
-        Id          = product.Id,
-        Name        = product.Name,
-        Description = product.Description,
-        Price       = product.Price,
-        Sku         = product.Sku,
-        Inventory   = product.Inventory,
-        Category    = product.Category,
-        ImageUrl    = product.ImagePath is not null ? storage.GetPublicUrl(product.ImagePath) : null,
-        IsActive    = product.IsActive,
-        CreatedAt   = product.CreatedAt,
-        UpdatedAt   = product.UpdatedAt
+        Id           = product.Id,
+        Name         = product.Name,
+        Description  = product.Description,
+        Price        = product.Price,
+        Sku          = product.Sku,
+        Inventory    = product.Inventory,
+        CategoryId   = product.CategoryId,
+        CategoryName = product.Category?.Name,
+        ImageUrl     = product.ImagePath is not null ? storage.GetPublicUrl(product.ImagePath) : null,
+        IsActive     = product.IsActive,
+        CreatedAt    = product.CreatedAt,
+        UpdatedAt    = product.UpdatedAt
     };
 }
