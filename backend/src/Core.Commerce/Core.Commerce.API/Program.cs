@@ -1,3 +1,4 @@
+using Microsoft.Extensions.FileProviders;
 using System.Text.Json;
 using Core.Commerce.Infrastructure.Extensions;
 using Core.Commerce.Infrastructure.Persistence;
@@ -71,6 +72,36 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("CorsPolicy");
+
+/* Serve uploaded product images from the configured storage path.
+   In local Windows development, Docker-style paths such as "/app/uploads"
+   are not valid physical roots, so we normalize them against the app
+   content root before registering the static files middleware.*/
+
+var uploadsPath = builder.Configuration["Uploads:Path"];
+if (!string.IsNullOrWhiteSpace(uploadsPath))
+{
+    var isWindows = OperatingSystem.IsWindows();
+    var looksLikeLinuxAbsolutePath = uploadsPath.StartsWith('/') || uploadsPath.StartsWith('\\');
+
+    var resolvedUploadsPath = uploadsPath;
+    if (!Path.IsPathFullyQualified(uploadsPath) || (isWindows && looksLikeLinuxAbsolutePath))
+    {
+        resolvedUploadsPath = Path.Combine(
+            builder.Environment.ContentRootPath,
+            uploadsPath.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+    }
+
+    resolvedUploadsPath = Path.GetFullPath(resolvedUploadsPath);
+
+    Directory.CreateDirectory(resolvedUploadsPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(resolvedUploadsPath),
+        RequestPath = "/uploads"
+    });
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
