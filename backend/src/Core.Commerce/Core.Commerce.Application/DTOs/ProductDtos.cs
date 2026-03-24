@@ -8,7 +8,8 @@ public class ProductDto
     public decimal  Price       { get; set; }
     public string   Sku         { get; set; } = string.Empty;
     public int      Inventory   { get; set; }
-    public string   Category    { get; set; } = string.Empty;
+    public Guid?    CategoryId  { get; set; }
+    public string?  CategoryName { get; set; }
     public string?  ImageUrl    { get; set; }
     public bool     IsActive    { get; set; }
     public DateTime CreatedAt   { get; set; }
@@ -22,6 +23,7 @@ public class CreateProductDto
     public decimal Price       { get; set; }
     public string  Sku         { get; set; } = string.Empty;
     public int     Inventory   { get; set; }
+    public Guid?   CategoryId  { get; set; }
 }
 
 public class UpdateProductDto
@@ -31,4 +33,6 @@ public class UpdateProductDto
     public decimal Price       { get; set; }
     public string  Sku         { get; set; } = string.Empty;
     public int     Inventory   { get; set; }
+    public Guid?   CategoryId  { get; set; }
+    public bool    IsActive    { get; set; } = true;
 }

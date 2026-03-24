@@ -20,6 +20,7 @@ public class UpdateCategory(IUnitOfWork uow)
 
         category.Name        = dto.Name.Trim();
         category.Description = dto.Description.Trim();
+        category.IsActive    = dto.IsActive;
 
         uow.Categories.Update(category);
         await uow.SaveChangesAsync(ct);

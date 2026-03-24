@@ -28,6 +28,7 @@ public class CreateProduct(IUnitOfWork uow, IFileStorageService storage)
             Price       = dto.Price,
             Sku         = dto.Sku.Trim().ToUpperInvariant(),
             Inventory   = dto.Inventory,
+            CategoryId  = dto.CategoryId,
             ImagePath   = imagePath
         };
 
@@ -42,7 +43,7 @@ public class CreateProduct(IUnitOfWork uow, IFileStorageService storage)
             Price       = product.Price,
             Sku         = product.Sku,
             Inventory   = product.Inventory,
-            Category    = product.Category,
+            CategoryId  = product.CategoryId,
             ImageUrl    = imagePath is not null ? storage.GetPublicUrl(imagePath) : null,
             IsActive    = product.IsActive,
             CreatedAt   = product.CreatedAt,

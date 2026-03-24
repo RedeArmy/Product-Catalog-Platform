@@ -11,6 +11,12 @@ public class GetCategories(IUnitOfWork uow)
         var categories = await uow.Categories.GetAllAsync(ct);
         return Result<IEnumerable<CategoryDto>>.Ok(categories.Select(Map));
     }
+    
+    public async Task<Result<IEnumerable<CategoryDto>>> ExecutePublicAsync(CancellationToken ct = default)
+    {
+        var categories = await uow.Categories.GetPublicAsync(ct);
+        return Result<IEnumerable<CategoryDto>>.Ok(categories.Select(Map));
+    }
 
     public async Task<Result<CategoryDto>> ExecuteByIdAsync(Guid id, CancellationToken ct = default)
     {
