@@ -42,6 +42,7 @@ public class CreateProduct(IUnitOfWork uow, IFileStorageService storage)
             Price       = product.Price,
             Sku         = product.Sku,
             Inventory   = product.Inventory,
+            Category    = product.Category,
             ImageUrl    = imagePath is not null ? storage.GetPublicUrl(imagePath) : null,
             IsActive    = product.IsActive,
             CreatedAt   = product.CreatedAt,

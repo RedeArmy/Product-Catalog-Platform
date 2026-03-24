@@ -46,6 +46,7 @@ public class UpdateProduct(IUnitOfWork uow, IFileStorageService storage)
             Price       = product.Price,
             Sku         = product.Sku,
             Inventory   = product.Inventory,
+            Category    = product.Category,
             ImageUrl    = product.ImagePath is not null ? storage.GetPublicUrl(product.ImagePath) : null,
             IsActive    = product.IsActive,
             CreatedAt   = product.CreatedAt,

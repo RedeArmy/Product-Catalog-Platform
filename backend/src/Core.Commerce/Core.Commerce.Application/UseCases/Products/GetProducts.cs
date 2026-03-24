@@ -29,17 +29,18 @@ public class GetProducts(IUnitOfWork uow, IFileStorageService storage)
         return Result<ProductDto>.Ok(Map(product));
     }
 
-    private ProductDto Map(Product p) => new()
+    private ProductDto Map(Product product) => new()
     {
-        Id          = p.Id,
-        Name        = p.Name,
-        Description = p.Description,
-        Price       = p.Price,
-        Sku         = p.Sku,
-        Inventory   = p.Inventory,
-        ImageUrl    = p.ImagePath is not null ? storage.GetPublicUrl(p.ImagePath) : null,
-        IsActive    = p.IsActive,
-        CreatedAt   = p.CreatedAt,
-        UpdatedAt   = p.UpdatedAt
+        Id          = product.Id,
+        Name        = product.Name,
+        Description = product.Description,
+        Price       = product.Price,
+        Sku         = product.Sku,
+        Inventory   = product.Inventory,
+        Category    = product.Category,
+        ImageUrl    = product.ImagePath is not null ? storage.GetPublicUrl(product.ImagePath) : null,
+        IsActive    = product.IsActive,
+        CreatedAt   = product.CreatedAt,
+        UpdatedAt   = product.UpdatedAt
     };
 }
