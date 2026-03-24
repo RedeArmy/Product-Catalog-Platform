@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Core.Commerce.Application.Interfaces;
 using Core.Commerce.Application.UseCases.Auth;
+using Core.Commerce.Application.UseCases.Categories;
 using Core.Commerce.Application.UseCases.Products;
 using Core.Commerce.Domain.Entities;
 using Core.Commerce.Domain.Interfaces;
@@ -93,10 +94,17 @@ public static class ServiceExtensions
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services)
     {
+        //Products
         services.AddScoped<GetProducts>();
         services.AddScoped<CreateProduct>();
         services.AddScoped<UpdateProduct>();
         services.AddScoped<DeleteProduct>();
+        
+        //Categories
+        services.AddScoped<GetCategories>();
+        services.AddScoped<CreateCategory>();
+        services.AddScoped<UpdateCategory>();
+        services.AddScoped<DeleteCategory>();
         
         services.AddScoped<Login>();
         

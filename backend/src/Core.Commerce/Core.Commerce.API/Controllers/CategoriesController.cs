@@ -1,5 +1,5 @@
 using Core.Commerce.Application.DTOs;
-using Core.Commerce.Application.UseCases.Products;
+using Core.Commerce.Application.UseCases.Categories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,26 +7,23 @@ namespace Core.Commerce.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(
-    GetProducts    getProducts,
-    CreateProduct  createProduct,
-    UpdateProduct  updateProduct,
-    DeleteProduct  deleteProduct) : ControllerBase
+public class CategoriesController(
+    GetCategories    getCategories,
+    CreateCategory   createCategory,
+    UpdateCategory   updateCategory,
+    DeleteCategory   deleteCategory) : ControllerBase
 {
     [HttpGet]
-    [Authorize]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var result = await getProducts.ExecuteAllAsync(ct);
+        var result = await getCategories.ExecuteAllAsync(ct);
         return Ok(result.Data);
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
-        var result = await getProducts.ExecuteByIdAsync(id, ct);
-
+        var result = await getCategories.ExecuteByIdAsync(id, ct);
         if (!result.Success)
             return NotFound(new { message = result.Error });
 
@@ -36,16 +33,10 @@ public class ProductsController(
     [HttpPost]
     [Authorize(Roles = "Administrator,Collaborator")]
     public async Task<IActionResult> Create(
-        [FromForm] CreateProductDto dto,
-        IFormFile?                  image,
-        CancellationToken           ct)
+        [FromBody] CreateCategoryDto dto,
+        CancellationToken ct)
     {
-        var result = await createProduct.ExecuteAsync(
-            dto,
-            image?.OpenReadStream(),
-            image?.FileName,
-            ct);
-
+        var result = await createCategory.ExecuteAsync(dto, ct);
         if (!result.Success)
             return BadRequest(new { message = result.Error });
 
@@ -55,20 +46,13 @@ public class ProductsController(
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "Administrator,Collaborator")]
     public async Task<IActionResult> Update(
-        Guid                        id,
-        [FromForm] UpdateProductDto dto,
-        IFormFile?                  image,
-        CancellationToken           ct)
+        Guid id,
+        [FromBody] UpdateCategoryDto dto,
+        CancellationToken ct)
     {
-        var result = await updateProduct.ExecuteAsync(
-            id,
-            dto,
-            image?.OpenReadStream(),
-            image?.FileName,
-            ct);
-
+        var result = await updateCategory.ExecuteAsync(id, dto, ct);
         if (!result.Success)
-            return result.Error == "Product not found."
+            return result.Error == "Category not found."
                 ? NotFound(new { message = result.Error })
                 : BadRequest(new { message = result.Error });
 
@@ -79,8 +63,7 @@ public class ProductsController(
     [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var result = await deleteProduct.ExecuteAsync(id, ct);
-
+        var result = await deleteCategory.ExecuteAsync(id, ct);
         if (!result.Success)
             return NotFound(new { message = result.Error });
 

@@ -8,6 +8,7 @@ namespace Core.Commerce.Infrastructure.Persistence;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Category> Categories => Set<Category>();
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
