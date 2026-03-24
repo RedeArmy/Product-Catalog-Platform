@@ -92,4 +92,18 @@ public class ProductsController(
 
         return NoContent();
     }
+    
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategories(CancellationToken ct)
+    {
+        var result = await getProducts.ExecuteAllAsync(ct);
+        var categories = result.Data?
+            .Where(p => !string.IsNullOrWhiteSpace(p.Category))
+            .Select(p => p.Category)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
+
+        return Ok(categories ?? []);
+    }
 }

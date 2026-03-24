@@ -9,4 +9,5 @@ public class Product : BaseEntity
     public int     Inventory   { get; set; }
     public string? ImagePath   { get; set; }
     public bool    IsActive    { get; set; } = true;
+    public string Category { get; set; } = string.Empty;
 }

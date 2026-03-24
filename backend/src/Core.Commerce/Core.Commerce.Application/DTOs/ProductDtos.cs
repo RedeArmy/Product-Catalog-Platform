@@ -8,6 +8,7 @@ public class ProductDto
     public decimal  Price       { get; set; }
     public string   Sku         { get; set; } = string.Empty;
     public int      Inventory   { get; set; }
+    public string   Category    { get; set; } = string.Empty;
     public string?  ImageUrl    { get; set; }
     public bool     IsActive    { get; set; }
     public DateTime CreatedAt   { get; set; }
