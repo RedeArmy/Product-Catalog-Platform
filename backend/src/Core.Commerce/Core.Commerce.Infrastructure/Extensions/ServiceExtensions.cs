@@ -106,6 +106,8 @@ public static class ServiceExtensions
         services.AddScoped<UpdateCategory>();
         services.AddScoped<DeleteCategory>();
         
+        services.AddScoped<BulkUploadProducts>();
+        
         services.AddScoped<Login>();
         
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
