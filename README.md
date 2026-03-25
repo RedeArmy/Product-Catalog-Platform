@@ -71,7 +71,7 @@ frontend/src/
 |-- pages/
 |   |-- admin/                     # Admin workspace views
 |   |-- public/                    # Public storefront views
-`-- router/                        # Route guards and app router
+|-- router/                        # Route guards and app router
 ```
 
 ## Project Structure
@@ -88,7 +88,7 @@ Product-Catalog-Platform/
 |       |-- Core.Commerce.API/
 |       |-- Core.Commerce.Application/
 |       |-- Core.Commerce.Domain/
-|       `-- Core.Commerce.Infrastructure/
+|       |-- Core.Commerce.Infrastructure/
 |-- frontend/
 |   |-- Dockerfile
 |   |-- nginx.conf
@@ -305,8 +305,8 @@ Permissions:
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
 | GET | `/api/categories/public` | Public | List active categories |
-| GET | `/api/categories` | Public | List all categories |
-| GET | `/api/categories/{id}` | Public | Get category by ID |
+| GET | `/api/categories` | JWT | List all categories |
+| GET | `/api/categories/{id}` | JWT | Get category by ID |
 | POST | `/api/categories` | Admin + Collaborator | Create a category |
 | PUT | `/api/categories/{id}` | Admin + Collaborator | Update a category |
 | DELETE | `/api/categories/{id}` | Admin only | Deactivate a category |
