@@ -11,77 +11,85 @@ public class BulkUploadProducts(IUnitOfWork uow)
         Stream            csvStream,
         CancellationToken ct = default)
     {
-        var result = new BulkUploadResultDto();
-        var rows   = await ParseCsvAsync(csvStream, ct);
+    var result = new BulkUploadResultDto();
+    var rows   = await ParseCsvAsync(csvStream, ct);
+    result.TotalRows = rows.Count;
+    
+    var categoryCache = (await uow.Categories.GetAllAsync(ct))
+        .ToDictionary(c => c.Name.ToLowerInvariant(), c => c.Id);
 
-        result.TotalRows = rows.Count;
-
-        foreach (var (dto, rowIndex) in rows.Select((r, i) => (r, i + 2)))
+    foreach (var (dto, rowIndex) in rows.Select((r, i) => (r, i + 2)))
+    {
+        try
         {
-            try
+            if (await uow.Products.SkuExistsAsync(dto.Sku, ct: ct))
             {
-                // Skip if SKU already exists
-                if (await uow.Products.SkuExistsAsync(dto.Sku, ct: ct))
-                {
-                    result.Skipped++;
-                    result.Errors.Add(new BulkUploadErrorDto
-                    {
-                        Row     = rowIndex,
-                        Sku     = dto.Sku,
-                        Message = $"SKU '{dto.Sku}' already exists — skipped."
-                    });
-                    continue;
-                }
-
-                // Resolve or create a category
-                Guid? categoryId = null;
-                if (!string.IsNullOrWhiteSpace(dto.Category))
-                    categoryId = await ResolveOrCreateCategoryAsync(dto.Category.Trim(), ct);
-
-                var product = new Product
-                {
-                    Name        = dto.Name.Trim(),
-                    Description = dto.Description.Trim(),
-                    Price       = dto.Price,
-                    Sku         = dto.Sku.Trim().ToUpperInvariant(),
-                    Inventory   = dto.Inventory,
-                    CategoryId  = categoryId,
-                    ImagePath   = string.IsNullOrWhiteSpace(dto.ImageUrl)
-                                    ? null
-                                    : dto.ImageUrl.Trim()
-                };
-
-                await uow.Products.AddAsync(product, ct);
-                result.Created++;
-            }
-            catch (Exception ex)
-            {
+                result.Skipped++;
                 result.Errors.Add(new BulkUploadErrorDto
                 {
                     Row     = rowIndex,
                     Sku     = dto.Sku,
-                    Message = ex.Message
+                    Message = $"SKU '{dto.Sku}' already exists — skipped."
                 });
+                continue;
             }
-        }
 
-        await uow.SaveChangesAsync(ct);
-        return Result<BulkUploadResultDto>.Ok(result);
+            Guid? categoryId = null;
+            if (!string.IsNullOrWhiteSpace(dto.Category))
+                categoryId = await ResolveOrCreateCategoryAsync(
+                    dto.Category.Trim(), categoryCache, ct);
+
+            string? imagePath = null;
+            if (!string.IsNullOrWhiteSpace(dto.ImageUrl))
+            {
+                var imageRef = dto.ImageUrl.Trim();
+                if (imageRef.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                    imageRef.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    imagePath = imageRef;
+            }
+
+            var product = new Product
+            {
+                Name        = dto.Name.Trim(),
+                Description = dto.Description.Trim(),
+                Price       = dto.Price,
+                Sku         = dto.Sku.Trim().ToUpperInvariant(),
+                Inventory   = dto.Inventory,
+                CategoryId  = categoryId,
+                ImagePath   = imagePath
+            };
+
+            await uow.Products.AddAsync(product, ct);
+            await uow.SaveChangesAsync(ct);
+            result.Created++;
+        }
+        catch (Exception ex)
+        {
+            var message = ex.InnerException?.Message ?? ex.Message;
+            result.Errors.Add(new BulkUploadErrorDto
+            {
+                Row     = rowIndex,
+                Sku     = dto.Sku,
+                Message = message
+            });
+        }
     }
 
+    return Result<BulkUploadResultDto>.Ok(result);
+}
+
     private async Task<Guid> ResolveOrCreateCategoryAsync(
-        string            name,
-        CancellationToken ct)
+        string                      name,
+        Dictionary<string, Guid>    cache,
+        CancellationToken           ct)
     {
-        // Check if a category already exists
-        var all      = await uow.Categories.GetAllAsync(ct);
-        var existing = all.FirstOrDefault(c =>
-            string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
+        var key = name.ToLowerInvariant();
 
-        if (existing is not null)
-            return existing.Id;
+        // Already in cache (from BD or created earlier in this batch)
+        if (cache.TryGetValue(key, out var existingId))
+            return existingId;
 
-        // Create a new category automatically
+        // Not found — create and add to cache immediately
         var category = new Category
         {
             Name        = name,
@@ -89,6 +97,9 @@ public class BulkUploadProducts(IUnitOfWork uow)
         };
 
         await uow.Categories.AddAsync(category, ct);
+        await uow.SaveChangesAsync(ct);  // Save immediately to avoid UK conflict
+
+        cache[key] = category.Id;
         return category.Id;
     }
 
