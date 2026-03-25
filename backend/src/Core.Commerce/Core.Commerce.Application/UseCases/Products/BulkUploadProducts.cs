@@ -20,6 +20,19 @@ public class BulkUploadProducts(IUnitOfWork uow)
         {
             try
             {
+                // Skip if SKU already exists
+                if (await uow.Products.SkuExistsAsync(dto.Sku, ct: ct))
+                {
+                    result.Skipped++;
+                    result.Errors.Add(new BulkUploadErrorDto
+                    {
+                        Row     = rowIndex,
+                        Sku     = dto.Sku,
+                        Message = $"SKU '{dto.Sku}' already exists — skipped."
+                    });
+                    continue;
+                }
+
                 // Resolve or create a category
                 Guid? categoryId = null;
                 if (!string.IsNullOrWhiteSpace(dto.Category))
