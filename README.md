@@ -1,11 +1,4 @@
 ﻿# Product Catalog Platform
-
-[![Build and Analyze](https://github.com/RedeArmy/Product-Catalog-Platform/actions/workflows/sonar.yml/badge.svg)](https://github.com/RedeArmy/Product-Catalog-Platform/actions/workflows/sonar.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=RedeArmy_Product-Catalog-Platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=RedeArmy_Product-Catalog-Platform)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=RedeArmy_Product-Catalog-Platform&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=RedeArmy_Product-Catalog-Platform)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=RedeArmy_Product-Catalog-Platform&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=RedeArmy_Product-Catalog-Platform)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=RedeArmy_Product-Catalog-Platform&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=RedeArmy_Product-Catalog-Platform)
-
 A modern full-stack e-commerce catalog platform built with **ASP.NET Core 8**, **React**, and **PostgreSQL**. It includes a public storefront, an admin workspace, JWT authentication, bulk product import, Docker-based local setup, and a project structure designed for long-term maintainability.
 
 ## Table of Contents
@@ -69,7 +62,7 @@ backend/src/
 |-- Core.Commerce.Domain/          # Entities, interfaces, enums
 |-- Core.Commerce.Application/     # Use cases, DTOs, contracts
 |-- Core.Commerce.Infrastructure/  # EF Core, repositories, JWT, file storage
-`-- Core.Commerce.API/             # Controllers, middleware, Program.cs
+|-- Core.Commerce.API/             # Controllers, middleware, Program.cs
 
 frontend/src/
 |-- api/                           # Axios client and JWT interceptors
@@ -77,7 +70,7 @@ frontend/src/
 |-- context/                       # Authentication context
 |-- pages/
 |   |-- admin/                     # Admin workspace views
-|   `-- public/                    # Public storefront views
+|   |-- public/                    # Public storefront views
 `-- router/                        # Route guards and app router
 ```
 
@@ -86,11 +79,11 @@ frontend/src/
 ```text
 Product-Catalog-Platform/
 |-- .github/
-|   `-- workflows/
-|       `-- sonar.yml
+|   |-- workflows/
+|       |-- sonar.yml
 |-- backend/
 |   |-- Dockerfile
-|   `-- src/Core.Commerce/
+|   |-- src/Core.Commerce/
 |       |-- Core.Commerce.sln
 |       |-- Core.Commerce.API/
 |       |-- Core.Commerce.Application/
@@ -99,10 +92,10 @@ Product-Catalog-Platform/
 |-- frontend/
 |   |-- Dockerfile
 |   |-- nginx.conf
-|   `-- src/
+|   |-- src/
 |-- docker-compose.yml
 |-- .env.example
-`-- README.md
+|-- README.md
 ```
 
 ## Getting Started
@@ -124,6 +117,19 @@ Product-Catalog-Platform/
 git clone https://github.com/RedeArmy/Product-Catalog-Platform.git
 cd Product-Catalog-Platform
 ```
+## Environment Variables
+
+| Variable | Description | Example |
+|---|---|---|
+| `POSTGRES_DB` | PostgreSQL database name | `ecommerce_db` |
+| `POSTGRES_USER` | PostgreSQL username | `ecommerce_user` |
+| `POSTGRES_PASSWORD` | PostgreSQL password | `SecurePass123!` |
+| `JWT_KEY` | JWT signing key, minimum 32 chars | `your_secret_key_here!` |
+| `JWT_ISSUER` | JWT issuer | `ecommerce-api` |
+| `JWT_AUDIENCE` | JWT audience | `ecommerce-web` |
+| `JWT_EXPIRES_MINUTES` | Token expiration time | `60` |
+| `UPLOADS_BASE_URL` | Base URL for uploaded files | `http://localhost:5000` |
+| `VITE_API_URL` | Frontend API URL | `http://localhost:5000` |
 
 ### Create your environment file
 
@@ -346,20 +352,6 @@ dotnet ef migrations add MigrationName \
   --context AppDbContext
 ```
 
-## Environment Variables
-
-| Variable | Description | Example |
-|---|---|---|
-| `POSTGRES_DB` | PostgreSQL database name | `ecommerce_db` |
-| `POSTGRES_USER` | PostgreSQL username | `ecommerce_user` |
-| `POSTGRES_PASSWORD` | PostgreSQL password | `SecurePass123!` |
-| `JWT_KEY` | JWT signing key, minimum 32 chars | `your_secret_key_here!` |
-| `JWT_ISSUER` | JWT issuer | `ecommerce-api` |
-| `JWT_AUDIENCE` | JWT audience | `ecommerce-web` |
-| `JWT_EXPIRES_MINUTES` | Token expiration time | `60` |
-| `UPLOADS_BASE_URL` | Base URL for uploaded files | `http://localhost:5000` |
-| `VITE_API_URL` | Frontend API URL | `http://localhost:5000` |
-
 ## CI/CD and Quality
 
 Every push and pull request triggers the GitHub Actions workflow for build and SonarCloud analysis.
@@ -374,7 +366,3 @@ This pipeline helps enforce:
 ## License
 
 This project is licensed under the MIT License.
-
-
-
-
