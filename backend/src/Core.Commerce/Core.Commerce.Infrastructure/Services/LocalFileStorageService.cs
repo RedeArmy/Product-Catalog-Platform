@@ -1,4 +1,4 @@
-using Core.Commerce.Application.Interfaces;
+﻿using Core.Commerce.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 
 namespace Core.Commerce.Infrastructure.Services;
@@ -42,5 +42,12 @@ public class LocalFileStorageService(IConfiguration config) : IFileStorageServic
     }
 
     public string GetPublicUrl(string relativePath)
-        => $"{_baseUrl.TrimEnd('/')}/uploads/{relativePath.Replace('\\', '/')}";
+    {
+        // If already a full URL return as-is
+        if (relativePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            relativePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return relativePath;
+
+        return $"{_baseUrl.TrimEnd('/')}/uploads/{relativePath.Replace('\\', '/')}";
+    }
 }
