@@ -11,7 +11,8 @@ public class ProductsController(
     GetProducts    getProducts,
     CreateProduct  createProduct,
     UpdateProduct  updateProduct,
-    DeleteProduct  deleteProduct) : ControllerBase
+    DeleteProduct  deleteProduct,
+    BulkUploadProducts bulkUploadProducts) : ControllerBase
 {
     [HttpGet]
     [Authorize]
@@ -85,5 +86,33 @@ public class ProductsController(
             return NotFound(new { message = result.Error });
 
         return NoContent();
+    }
+    
+    [HttpGet("bulk-upload/template")]
+    public IActionResult DownloadTemplate()
+    {
+        const string csv = "Name,Description,Price,SKU,Inventory,Category,ImageUrl\n" +
+                           "Sample Product,Product description,99.99,SKU-001,10,Category Name,https://example.com/image.jpg";
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+        return File(bytes, "text/csv", "products_template.csv");
+    }
+    
+    [HttpPost("bulk-upload")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> BulkUpload(
+        IFormFile?         file,
+        CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { message = "CSV file is required." });
+
+        if (!file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { message = "Only .csv files are accepted." });
+
+        await using var stream = file.OpenReadStream();
+        var result = await bulkUploadProducts.ExecuteAsync(stream, ct);
+
+        return Ok(result.Data);
     }
 }
