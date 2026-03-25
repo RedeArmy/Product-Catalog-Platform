@@ -2,6 +2,7 @@ using Core.Commerce.Application.Common;
 using Core.Commerce.Application.DTOs;
 using Core.Commerce.Domain.Entities;
 using Core.Commerce.Domain.Interfaces;
+using System.Text;
 
 namespace Core.Commerce.Application.UseCases.Products;
 
@@ -89,7 +90,7 @@ public class BulkUploadProducts(IUnitOfWork uow)
         if (cache.TryGetValue(key, out var existingId))
             return existingId;
 
-        // Not found — create and add to cache immediately
+        // Not found — create and add to the cache immediately
         var category = new Category
         {
             Name        = name,
@@ -108,25 +109,34 @@ public class BulkUploadProducts(IUnitOfWork uow)
         CancellationToken ct)
     {
         var results = new List<BulkUploadProductDto>();
-        using var reader = new StreamReader(stream);
-        
-        var header = await reader.ReadLineAsync(ct);
-        if (header is null) return results;
+        using var buffer = new MemoryStream();
 
-        while (!reader.EndOfStream)
+        await stream.CopyToAsync(buffer, ct);
+        buffer.Position = 0;
+
+        // Detect encoding
+        var bytes      = buffer.ToArray();
+        var utf8Content = Encoding.UTF8.GetString(bytes);
+        var content     = utf8Content.Contains('\uFFFD')
+            ? Encoding.Latin1.GetString(bytes)
+            : utf8Content;
+
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+        // Skip header
+        foreach (var line in lines.Skip(1))
         {
-            var line = await reader.ReadLineAsync(ct);
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var columns = SplitCsvLine(line);
+            var columns = SplitCsvLine(line.TrimEnd('\r'));
             if (columns.Length < 6) continue;
 
-            if (!decimal.TryParse(columns[2], System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var price))
-                continue;
+            if (!decimal.TryParse(columns[2],
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out var price)) continue;
 
-            if (!int.TryParse(columns[4], out var inventory))
-                continue;
+            if (!int.TryParse(columns[4], out var inventory)) continue;
 
             results.Add(new BulkUploadProductDto
             {
@@ -147,7 +157,7 @@ public class BulkUploadProducts(IUnitOfWork uow)
     {
         // Handles quoted fields with commas inside
         var result  = new List<string>();
-        var current = new System.Text.StringBuilder();
+        var current = new StringBuilder();
         var inQuotes = false;
 
         foreach (var ch in line)
